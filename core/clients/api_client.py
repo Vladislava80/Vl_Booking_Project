@@ -2,6 +2,10 @@ import requests
 import os
 from dotenv import load_dotenv
 from core.settings.environments import Environment
+import allure
+from core.clients.endpoints import Endpoints
+from core.settings.config import Users, Timeouts
+
 
 load_dotenv()
 
@@ -14,7 +18,8 @@ class APIClient:
             raise ValueError(f"Unsupported environment value: {environment_str}")
 
         self.base_url = self.get_base_url(environment)
-        self.headers = {
+        self.session = requests.Session()
+        self.session.headers = {
             "Content-Type": "application/json"
         }
 
@@ -41,3 +46,40 @@ class APIClient:
         if status_code:
             assert response.status_code == status_code
         return response.json()
+
+
+    def ping(self):
+        with allure.step("Ping API client"):
+            url = f"{self.base_url}{Endpoints.PING_ENDPOINT}"
+            response = self.session.get(url)
+            response.raise_for_status()
+        with allure.step("Assert status code"):
+            assert response.status_code == 201, f"Expected 201, but got {response.status_code}"
+        return response.status_code
+
+
+    def auth(self):
+        with allure.step("Getting authenticate"):
+            url = f"{self.base_url}{Endpoints.AUTH_ENDPOINT}"
+            payload = {
+                "username": Users.USERNAME,
+                "password": Users.PASSWORD
+            }
+            response = self.session.post(url, json=payload, timeout=Timeouts.TIMEOUT)
+            response.raise_for_status()
+        with allure.step("Checking status code"):
+            assert response.status_code == 200, f"Expected 200, but got {response.status_code}"
+        token = response.json()["token"]
+        with allure.step("Update header with authorization"):
+            self.session.headers.update({"Authorization": f"Bearer {token}"})
+
+
+    def get_booking_by_id(self, booking_id):
+        with allure.step(f"Get booking by id: {booking_id}"):
+            url = f"{self.base_url}/booking/{booking_id}"
+            response = self.session.get(url)
+            response.raise_for_status()
+        with allure.step("Assert status code"):
+            assert response.status_code == 200, f"Expected 200, but got {response.status_code}"
+            return response
+
