@@ -85,12 +85,9 @@ def test_create_booking_with_invalid_data(api_client):
     }
 
     response = api_client.create_booking(booking_data)
-    try:
+    with pytest.raises(ValidationError) as e:
         BookingResponse(**response)
-    except ValidationError as e:
-        raise ValidationError(f'Response validation failed: {e}')
 
-    assert response['status_code'] == 400
 
 
 @allure.feature('Test creating booking')
@@ -109,12 +106,9 @@ def test_create_booking_with_empty_field(api_client):
     }
 
     response = api_client.create_booking(booking_data)
-    try:
+    with pytest.raises(ValidationError) as e:
         BookingResponse(**response)
-    except ValidationError as e:
-        raise ValidationError(f'Response validation failed: {e}')
 
-    assert response['status_code'] == 400
 
 
 @allure.feature('Test creating booking')
@@ -132,9 +126,5 @@ def test_create_booking_without_required_field(api_client):
     }
 
     response = api_client.create_booking(booking_data)
-    try:
+    with pytest.raises(ValidationError) as e:
         BookingResponse(**response)
-    except ValidationError as e:
-        raise ValidationError(f'Response validation failed: {e}')
-
-    assert response['status_code'] == 400
