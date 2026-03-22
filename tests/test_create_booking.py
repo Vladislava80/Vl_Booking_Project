@@ -1,6 +1,7 @@
 import pytest, allure
 from pydantic import ValidationError
 from core.models.booking import BookingResponse
+from requests.exceptions import HTTPError
 
 
 @allure.feature('Test creating booking')
@@ -84,9 +85,8 @@ def test_create_booking_with_invalid_data(api_client):
         "additionalneeds": "Dinner"
     }
 
-    response = api_client.create_booking(booking_data)
-    with pytest.raises(ValidationError) as e:
-        BookingResponse(**response)
+    with pytest.raises(HTTPError):
+        api_client.create_booking(booking_data)
 
 
 
@@ -94,7 +94,7 @@ def test_create_booking_with_invalid_data(api_client):
 @allure.story('Negative: creating booking with empty field')
 def test_create_booking_with_empty_field(api_client):
     booking_data = {
-        "firstname": 123,
+        "firstname": "Jim",
         "lastname": "",
         "totalprice": 150,
         "depositpaid": True,
@@ -105,9 +105,8 @@ def test_create_booking_with_empty_field(api_client):
         "additionalneeds": "Dinner"
     }
 
-    response = api_client.create_booking(booking_data)
-    with pytest.raises(ValidationError) as e:
-        BookingResponse(**response)
+    with pytest.raises(HTTPError):
+        api_client.create_booking(booking_data)
 
 
 
@@ -115,7 +114,7 @@ def test_create_booking_with_empty_field(api_client):
 @allure.story('Negative: creating booking without required field')
 def test_create_booking_without_required_field(api_client):
     booking_data = {
-        "firstname": 123,
+        "firstname": "Jim",
         "lastname": "Brown",
         "totalprice": 150,
         "bookingdates": {
@@ -125,6 +124,5 @@ def test_create_booking_without_required_field(api_client):
         "additionalneeds": "Dinner"
     }
 
-    response = api_client.create_booking(booking_data)
-    with pytest.raises(ValidationError) as e:
-        BookingResponse(**response)
+    with pytest.raises(HTTPError):
+        api_client.create_booking(booking_data)
