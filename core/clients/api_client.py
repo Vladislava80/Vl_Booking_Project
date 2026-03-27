@@ -20,6 +20,9 @@ class APIClient:
 
         self.base_url = self.get_base_url(environment)
         self.session = requests.Session()
+        self.session.headers = {
+            'Content-Type': 'application/json',
+        }
 
 
     def get_base_url(self, environment: Environment) -> str:
@@ -68,6 +71,7 @@ class APIClient:
             response.raise_for_status()
         with allure.step("Checking status code"):
             assert response.status_code == 200, f"Expected 200, but got {response.status_code}"
+            print(response.json())
         token = response.json()["token"]
         with allure.step("Update header with authorization"):
             self.session.headers.update({"Authorization": f"Bearer {token}"})
@@ -95,6 +99,9 @@ class APIClient:
 
     def create_booking(self, booking_data):
         with allure.step("Creating booking"):
+            self.session.headers.update({
+                'Accept': 'application/json'
+            })
             url = f"{self.base_url}{Endpoints.BOOKING_ENDPOINT.value}"
             response = self.session.post(url, json=booking_data)
             response.raise_for_status()
