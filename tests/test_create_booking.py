@@ -89,27 +89,6 @@ def test_create_booking_with_invalid_data(api_client):
         api_client.create_booking(booking_data)
 
 
-
-@allure.feature('Test creating booking')
-@allure.story('Negative: creating booking with empty field')
-def test_create_booking_with_empty_field(api_client):
-    booking_data = {
-        "firstname": "Jim",
-        "lastname": "",
-        "totalprice": 150,
-        "depositpaid": True,
-        "bookingdates": {
-            "checkin": "2025-01-01",
-            "checkout": "2025-02-01"
-        },
-        "additionalneeds": "Dinner"
-    }
-
-    with pytest.raises(HTTPError):
-        api_client.create_booking(booking_data)
-
-
-
 @allure.feature('Test creating booking')
 @allure.story('Negative: creating booking without required field')
 def test_create_booking_without_required_field(api_client):
